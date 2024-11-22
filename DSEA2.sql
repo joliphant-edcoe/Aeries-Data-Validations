@@ -33,8 +33,9 @@ LEFT JOIN
     AND [STU].[SN] = [ATT].[SN]
 WHERE 
 	NOT STU.TG > ' '
-	AND ATT.RowNum = 1
-	AND STU.SC IN (60,61,68,69,70,72,73)
+	--AND COALESCE(ATT.RowNum,1) = 1
+	AND (ATT.RowNum = 1 OR ATT.RowNum is null)
+	AND STU.SC IN (60,61,68,69,70,72,73,51,100,101,150)
 	AND (STU.GR != ATT.GR 
 		OR STU.GR = -2 
 		OR ATT.GR = -2 

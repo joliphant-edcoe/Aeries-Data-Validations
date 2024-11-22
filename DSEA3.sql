@@ -48,9 +48,9 @@ LEFT JOIN
 	AND [STU].[SC] = [ENR].[SC]
 WHERE 
     NOT STU.TG > ' ' 
-	AND ATT.RowNum1 = 1
-    AND ENR.RowNum = 1 
-    AND STU.SC IN (60,61,68,69,70,72,73)
+	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+    AND (ENR.RowNum = 1 OR ENR.RowNum is null)
+    AND STU.SC IN (68,69,70,72,73,51,100,101,150)  -- not relevant to school 61!
 	AND (TRIM([STU].[AP1]) = '' 
 	OR TRIM([ENR].[AP1]) = '' 
 	OR TRIM([ATT].[AP1]) = '' 

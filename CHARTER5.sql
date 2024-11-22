@@ -8,9 +8,12 @@ SELECT
 		WHEN TRIM(STU.[SP]) = '' THEN 'Program is empty on STU table'
 		WHEN TRIM(ENR.[PR]) = '' THEN 'Program is empty on ENR table'
 		WHEN TRIM(ATT.[PR]) = '' THEN 'Program is empty on ATT table'
-		WHEN STU.SP NOT IN ('N','M','S') THEN 'Program is not "N","M" or "S"'
-		WHEN ENR.PR NOT IN ('N','M','S') THEN 'Program is not "N","M" or "S"'
-		WHEN ATT.PR NOT IN ('N','M','S') THEN 'Program is not "N","M" or "S"'
+		WHEN (STU.SP NOT IN ('B','C') AND STU.SC != 100) THEN 'Program is not "B" or "C"'
+		WHEN (ENR.PR NOT IN ('B','C') AND STU.SC != 100) THEN 'Program is not "B" or "C"'
+		WHEN (ATT.PR NOT IN ('B','C') AND STU.SC != 100) THEN 'Program is not "B" or "C"'
+		WHEN (STU.SP != 'A' AND STU.SC = 100) THEN 'SC:100 Program is not "A"'
+		WHEN (ENR.PR != 'A' AND STU.SC = 100) THEN 'SC:100 Program is not "A"'
+		WHEN (ATT.PR != 'A' AND STU.SC = 100) THEN 'SC:100 Program is not "A"'
 		WHEN STU.SP != ENR.PR THEN 'Program does not match between STU and ENR'
 		WHEN ENR.PR != ATT.PR THEN 'Program does not match between ENR and ATT'
 		WHEN ATT.PR != STU.SP THEN 'Program does not match between ATT and STU'
@@ -53,16 +56,19 @@ WHERE
     NOT STU.TG > ' ' 
 	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
     AND (ENR.RowNum = 1 OR ENR.RowNum is null)
-    AND STU.SC IN (60,61,68,69,70,72,73)
+    AND STU.SC IN (51,100,101,150)
 	AND (TRIM(STU.[SP]) = '' 
 		OR TRIM([ENR].[PR]) = '' 
 		OR TRIM([ATT].[PR]) = '' 
 		OR STU.SP != ENR.PR 
 	    OR ENR.PR != ATT.PR 
 		OR ATT.PR != STU.SP 
-		OR STU.SP NOT IN ('N','M','S') 
-		OR ENR.PR NOT IN ('N','M','S') 
-		OR ATT.PR NOT IN ('N','M','S'))
+		OR (STU.SP NOT IN ('B','C') AND STU.SC != 100)
+		OR (ENR.PR NOT IN ('B','C') AND STU.SC != 100) 
+		OR (ATT.PR NOT IN ('B','C') AND STU.SC != 100)
+		OR (STU.SP != 'A' AND STU.SC = 100)
+		OR (ENR.PR != 'A' AND STU.SC = 100)
+		OR (ATT.PR != 'A' AND STU.SC = 100))
 ORDER BY 
     STU.SC, STU.ID
 
