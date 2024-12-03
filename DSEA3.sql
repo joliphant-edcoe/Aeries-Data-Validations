@@ -126,8 +126,8 @@ LEFT JOIN
 	AND [STU].[SC] = [ENR].[SC]
 WHERE 
     NOT STU.TG > ' ' 
-	AND ATT.RowNum1 = 1
-    AND ENR.RowNum = 1 
+	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+    AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC = @SchoolCode
 	AND STU.ID IN (@StudentID)
 	AND (TRIM(STU.[AP1]) = '' 

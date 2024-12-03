@@ -68,37 +68,8 @@ ORDER BY
 
 
 /*
-select * from ATT
-where SN = 1043 --1046
-and CD = 'E'
-
-
-select * from STU
-where (NOT STU.TG > ' ') and GR = -2
-*/
-
-/*
-select * from STU
-where sc = 61
-
-select * from ENR
-where id = 60000298
-order by ed desc
-
-select * from ATT
-where SN = 655
-and CD = 'E'
-
-*/
---select TR, * from STU
---where sc = 61
-
-
-
-/*
 
 -- used in Aeries
--- for testing purposes
 SELECT 
     STU.ID AS StudentID, 
     CASE 
@@ -145,8 +116,8 @@ LEFT JOIN
 	AND STU.SC = ENR.SC
 WHERE 
     NOT STU.TG > ' ' 
-	AND ATT.RowNum1 = 1
-    AND ENR.RowNum = 1 
+	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+    AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC = @SchoolCode
 	AND STU.ID in (@StudentID)
 	AND (TRIM(STU.[SP]) = '' 

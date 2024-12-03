@@ -1,4 +1,3 @@
-
 SELECT
 	STU.SC [SchoolCode],
 	STU.ID [StudentID],

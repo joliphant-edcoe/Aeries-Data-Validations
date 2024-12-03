@@ -87,7 +87,7 @@ LEFT JOIN
     AND [STU].[SN] = [ATT].[SN]
 WHERE 
 	NOT STU.TG > ' '
-	AND ATT.RowNum = 1
+	AND (ATT.RowNum = 1 OR ATT.RowNum is null)
 	AND STU.SC = @SchoolCode
 	AND STU.ID IN (@StudentID)
 	AND (STU.GR != ATT.GR 

@@ -52,6 +52,7 @@ DistCodes AS (
 			WHEN ITD = '26102642630028' THEN 'Jan Work Community High'
 			WHEN ITD = '09618530936302' THEN 'Ponderosa High'
 			WHEN ITD = '09737830930073' THEN 'Black Oak Mine School Code'
+
 			WHEN TRIM(ITD) = '' THEN 'ResDist is missing'
 			ELSE 'Code not recognized in Data Validation'
 		END AS DEE
@@ -69,6 +70,9 @@ SELECT
 		WHEN TRIM(AttCodes.DE) = '' THEN 'AttPrgm1 code is missing, ResDist code is '+DistCodes.DEE
 		WHEN TRIM (DistCodes.DEE) = '' THEN 'ResDist code is missing, AttPrgm1 code is '+AttCodes.DE
 		WHEN AttCodes.DE != DistCodes.DEE THEN 'AttPrgm1 code is ' + AttCodes.DE + ' and ResDist code is ' + DistCodes.DEE
+		WHEN (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop')) THEN 'High school aged student that is in ' + AttCodes.DE + ' district'
+		WHEN (GR <= 8 AND AttCodes.DE = 'EDUHSD') THEN 'Elementary student in the High school district'
 		ELSE ''
 	END AS Description,
 	STU.AP1,
@@ -98,17 +102,15 @@ WHERE
 	1=1
 	AND NOT STU.TG > ' '
 	AND STU.SC IN (68,69,70,72,73,51,100,101,150)
-	AND AttCodes.DE != DistCodes.DEE
+	AND (AttCodes.DE != DistCodes.DEE
+		OR (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop'))
+		OR (GR <= 8 AND AttCodes.DE = 'EDUHSD'))
+
 ORDER BY 
 	SC,ID
 
 /*
-
-*/
-
-
-/*
-
 -- used in Aeries
 WITH AttCodes AS (
 	SELECT 
@@ -180,6 +182,9 @@ SELECT
 		WHEN TRIM(AttCodes.DE) = '' THEN 'AttPrgm1 code is missing, ResDist code is '+DistCodes.DEE
 		WHEN TRIM (DistCodes.DEE) = '' THEN 'ResDist code is missing, AttPrgm1 code is '+AttCodes.DE
 		WHEN AttCodes.DE != DistCodes.DEE THEN 'AttPrgm1 code is ' + AttCodes.DE + ' and ResDist code is ' + DistCodes.DEE
+		WHEN (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop')) THEN 'High school aged student that is in ' + AttCodes.DE + ' district'
+		WHEN (GR <= 8 AND AttCodes.DE = 'EDUHSD') THEN 'Elementary student in the High school district'
 		ELSE ''
 	END AS Description
 FROM
@@ -197,7 +202,10 @@ LEFT JOIN
 WHERE 
 	1=1
 	AND NOT STU.TG > ' '
-	AND AttCodes.DE != DistCodes.DEE
+	AND (AttCodes.DE != DistCodes.DEE
+		OR (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop'))
+		OR (GR <= 8 AND AttCodes.DE = 'EDUHSD'))
 	AND STU.ID IN (@StudentID)
 	AND STU.SC = @SchoolCode
 
