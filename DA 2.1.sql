@@ -35,7 +35,9 @@ SELECT
 				END
 		)
 	) AS [Description],
-	STU.*, 
+	STU.SC,
+	STU.LN,
+	STU.FN,
 	ATT.*
 FROM 
 	(
@@ -56,13 +58,14 @@ LEFT JOIN
     ON [STU].[SC] = [ATT].[SC] 
     AND [STU].[SN] = [ATT].[SN]
 WHERE 
-	NOT STU.TG > ' '
+	1=1
+	--AND NOT STU.TG > ' '
 	AND (ATT.RowNum = 1 OR ATT.RowNum is null)
 	AND STU.SC IN (60,61,68,69,70,72,73,51,100,101,150)
 	AND (STU.GR != ATT.GR 
 		OR STU.GR = -2 
 		OR ATT.GR = -2 
-		OR ATT.GR is null 
+		OR (ATT.GR is null AND ATT.SN is not null) 
 		OR STU.GR is null
 		OR (STU.GR < 14 AND DATEDIFF(DAY, STU.BD,GETDATE())/365.25 - STU.GR < 4.0)
 		OR (STU.GR < 14 AND DATEDIFF(DAY, STU.BD,GETDATE())/365.25 - STU.GR > 8.5)
@@ -105,14 +108,15 @@ LEFT JOIN
     ON [STU].[SC] = [ATT].[SC] 
     AND [STU].[SN] = [ATT].[SN]
 WHERE 
-	NOT STU.TG > ' '
+	1=1
+	--NOT STU.TG > ' '
 	AND (ATT.RowNum = 1 OR ATT.RowNum is null)
 	AND STU.SC = @SchoolCode
 	AND STU.ID IN (@StudentID)
 	AND (STU.GR != ATT.GR 
 		OR STU.GR = -2 
 		OR ATT.GR = -2 
-		OR ATT.GR is null 
+		OR (ATT.GR is null AND ATT.SN is not null) 
 		OR STU.GR is null)
 
 

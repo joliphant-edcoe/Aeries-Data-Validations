@@ -77,10 +77,10 @@ SELECT
 						ELSE '' 
 					END
 			END,
-			CASE WHEN (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+			CASE WHEN (STU.GR >= 9 AND STU.GR <= 14 AND DistCodes.DEE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
 				'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop')) 
-				THEN 'High school aged student not in appropriate district (' + AttCodes.DE + '); ' ELSE '' END,
-			CASE WHEN (GR <= 8 AND AttCodes.DE = 'EDUHSD') THEN 'Elementary aged student in a High school district; ' ELSE '' END
+				THEN 'High school aged student not in appropriate district (' + DistCodes.DEE + '); ' ELSE '' END,
+			CASE WHEN (STU.GR <= 8 AND AttCodes.DE = 'EDUHSD') THEN 'Elementary aged student in a High school district; ' ELSE '' END
 		)
 	) AS [Description],
 	STU.AP1,
@@ -93,7 +93,7 @@ SELECT
 		WHEN AttCodes.DE = DistCodes.DEE THEN 'True'
 		ELSE 'False'
 	END AS Checked,
-	STU.*
+	STU.SC,STU.LN,STU.FN,STU.TG,ATT.AP1,ATT.RowNum1
 FROM
 	(
 		SELECT [STU].* 
@@ -106,14 +106,27 @@ LEFT JOIN
 LEFT JOIN
 	DistCodes
 	ON STU.ITD = DistCodes.DITD
+LEFT JOIN 
+    (
+        SELECT 
+			[ATT].*,
+			ROW_NUMBER() OVER (
+					PARTITION BY ATT.SC, ATT.SN ORDER BY ATT.DT DESC
+					) AS RowNum1  -- most recent
+        FROM ATT 
+        WHERE DEL = 0 AND CD = 'E'
+    ) ATT 
+    ON [STU].[SC] = [ATT].[SC] 
+    AND [STU].[SN] = [ATT].[SN]
 WHERE 
 	1=1
-	AND NOT STU.TG > ' '
+	--AND NOT STU.TG > ' '
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 IS NULL AND NOT STU.TG > '') OR (ATT.RowNum1 IS NOT NULL AND STU.TG > ''))
 	AND STU.SC IN (68,69,70,72,73,51,100,101,150)
 	AND (AttCodes.DE != DistCodes.DEE
-		OR (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		OR (STU.GR >= 9 AND STU.GR <= 14 AND DistCodes.DEE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
 		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop'))
-		OR (GR <= 8 AND AttCodes.DE = 'EDUHSD'))
+		OR (STU.GR <= 8 AND DistCodes.DEE = 'EDUHSD'))
 
 ORDER BY 
 	SC,ID
@@ -197,10 +210,10 @@ SELECT
 						ELSE '' 
 					END
 			END,
-			CASE WHEN (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+			CASE WHEN (STU.GR >= 9 AND STU.GR <= 14 AND DistCodes.DEE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
 				'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop')) 
-				THEN 'High school aged student not in appropriate district (' + AttCodes.DE + '); ' ELSE '' END,
-			CASE WHEN (GR <= 8 AND AttCodes.DE = 'EDUHSD') THEN 'Elementary aged student in a High school district; ' ELSE '' END
+				THEN 'High school aged student not in appropriate district (' + DistCodes.DEE + '); ' ELSE '' END,
+			CASE WHEN (STU.GR <= 8 AND DistCodes.DEE = 'EDUHSD') THEN 'Elementary aged student in a High school district; ' ELSE '' END
 		)
 	) AS [Description]
 FROM
@@ -215,13 +228,26 @@ LEFT JOIN
 LEFT JOIN
 	DistCodes
 	ON STU.ITD = DistCodes.DITD
+LEFT JOIN 
+    (
+        SELECT 
+			[ATT].*,
+			ROW_NUMBER() OVER (
+					PARTITION BY ATT.SC, ATT.SN ORDER BY ATT.DT DESC
+					) AS RowNum1  -- most recent
+        FROM ATT 
+        WHERE DEL = 0 AND CD = 'E'
+    ) ATT 
+    ON [STU].[SC] = [ATT].[SC] 
+    AND [STU].[SN] = [ATT].[SN]
 WHERE 
 	1=1
-	AND NOT STU.TG > ' '
+	--AND NOT STU.TG > ' '
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 IS NULL AND NOT STU.TG > '') OR (ATT.RowNum1 IS NOT NULL AND STU.TG > ''))
 	AND (AttCodes.DE != DistCodes.DEE
-		OR (GR >= 9 AND GR <= 14 AND AttCodes.DE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
+		OR (STU.GR >= 9 AND STU.GR <= 14 AND DistCodes.DEE NOT IN ('EDUHSD','Black Oak Mine','Lake Tahoe','Roseville Joint Union',
 		'Folsom/Cordova','SAC','Placer County','Elk Grove','Amador','San Juan','San Mateo COE','Bishop'))
-		OR (GR <= 8 AND AttCodes.DE = 'EDUHSD'))
+		OR (STU.GR <= 8 AND DistCodes.DEE = 'EDUHSD'))
 	AND STU.ID IN (@StudentID)
 	AND STU.SC = @SchoolCode
 

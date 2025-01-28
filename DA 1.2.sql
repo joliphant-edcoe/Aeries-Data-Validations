@@ -51,7 +51,8 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-    NOT STU.TG > ' ' 
+    1=1
+	--AND NOT STU.TG > ' ' 
 	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
     AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC IN (60,61,68,69,70,72,73)
@@ -117,7 +118,8 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-    NOT STU.TG > ' ' 
+    1=1
+	--AND NOT STU.TG > ' ' 
 	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
     AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC = @SchoolCode

@@ -6,9 +6,9 @@ SELECT
     [ATT].[PR] AS [ATT.PR],
 	TRIM(
 		CONCAT(
-			CASE WHEN TRIM(STU.[SP]) = '' THEN 'Program is empty on STU table; ' ELSE '' END,
-			CASE WHEN TRIM(ENR.[PR]) = '' THEN 'Program is empty on ENR table; ' ELSE '' END,
-			CASE WHEN TRIM(ATT.[PR]) = '' THEN 'Program is empty on ATT table; ' ELSE '' END,
+			CASE WHEN TRIM(STU.[SP]) = '' or STU.SP IS NULL THEN 'Program is empty on STU table; ' ELSE '' END,
+			CASE WHEN TRIM(ENR.[PR]) = '' or ENR.PR IS NULL THEN 'Program is empty on ENR table; ' ELSE '' END,
+			CASE WHEN TRIM(ATT.[PR]) = '' or ATT.PR IS NULL THEN 'Program is empty on ATT table; ' ELSE '' END,
 			CASE WHEN STU.SP != ENR.PR THEN 'Program does not match between STU and ENR; ' ELSE '' END,
 			CASE WHEN ENR.PR != ATT.PR THEN 'Program does not match between ENR and ATT; ' ELSE '' END,
 			CASE WHEN ATT.PR != STU.SP THEN 'Program does not match between ATT and STU; ' ELSE '' END,
@@ -24,9 +24,12 @@ SELECT
 	) AS [Description],
 	STU.BD AS [Birthday],
 	DATEDIFF(DAY, STU.BD,GETDATE())/365.25 AS [Age],
-    STU.*, 
-    ENR.*, 
-    ATT.*
+	STU.U7 AS [User Override],
+	STU.SC,
+	STU.LN,
+	STU.FN,
+	ATT.RowNum1,
+	STU.TG
 FROM 
     (
         SELECT [STU].* 
@@ -58,8 +61,11 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-    NOT STU.TG > ' ' 
-	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+	1=1
+    --NOT STU.TG > ' ' 
+	-- inactive students that have an Attendance Enrollment record should be checked.
+	-- active students that do not have an Attendance Enrollment record need to be flagged.
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 is null and not stu.tg > '') OR (ATT.RowNum1 is not null and stu.tg > ''))
     AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC IN (51,100,101,150)
 	AND (TRIM(STU.[SP]) = '' 
@@ -74,12 +80,15 @@ WHERE
 		OR (STU.SP != 'A' AND STU.SC = 100)
 		OR (ENR.PR != 'A' AND STU.SC = 100)
 		OR (ATT.PR != 'A' AND STU.SC = 100)
-	    OR (DATEDIFF(DAY, STU.BD,GETDATE())/365.25 >= 12 
-			AND STU.SP = 'B' )
+	    OR (
+			DATEDIFF(DAY, STU.BD,GETDATE())/365.25 >= 12 
+			AND STU.SP = 'B' 
+			AND TRIM(STU.U7) != 'B'
+			)
 		OR (DATEDIFF(DAY, STU.BD,GETDATE())/365.25 < 12 
 			AND STU.SP = 'C' ))
 ORDER BY 
-    STU.SC, STU.ID
+    STU.SC, STU.LN, STU.FN
 
 
 /*
@@ -89,9 +98,9 @@ SELECT
     STU.ID AS StudentID, 
     TRIM(
 		CONCAT(
-			CASE WHEN TRIM(STU.[SP]) = '' THEN 'Program is empty on STU table; ' ELSE '' END,
-			CASE WHEN TRIM(ENR.[PR]) = '' THEN 'Program is empty on ENR table; ' ELSE '' END,
-			CASE WHEN TRIM(ATT.[PR]) = '' THEN 'Program is empty on ATT table; ' ELSE '' END,
+			CASE WHEN TRIM(STU.[SP]) = '' or STU.SP IS NULL THEN 'Program is empty on STU table; ' ELSE '' END,
+			CASE WHEN TRIM(ENR.[PR]) = '' or ENR.PR IS NULL THEN 'Program is empty on ENR table; ' ELSE '' END,
+			CASE WHEN TRIM(ATT.[PR]) = '' or ATT.PR IS NULL THEN 'Program is empty on ATT table; ' ELSE '' END,
 			CASE WHEN STU.SP != ENR.PR THEN 'Program does not match between STU and ENR; ' ELSE '' END,
 			CASE WHEN ENR.PR != ATT.PR THEN 'Program does not match between ENR and ATT; ' ELSE '' END,
 			CASE WHEN ATT.PR != STU.SP THEN 'Program does not match between ATT and STU; ' ELSE '' END,
@@ -136,7 +145,11 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-    NOT STU.TG > ' ' 
+    1=1
+    --NOT STU.TG > ' ' 
+	-- inactive students that have an Attendance Enrollment record should be checked.
+	-- active students that do not have an Attendance Enrollment record need to be flagged.
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 is null and not stu.tg > '') OR (ATT.RowNum1 is not null and stu.tg > ''))
 	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
     AND (ENR.RowNum = 1 OR ENR.RowNum is null)
     AND STU.SC = @SchoolCode
@@ -153,7 +166,7 @@ WHERE
 		OR (STU.SP != 'A' AND STU.SC = 100)
 		OR (ENR.PR != 'A' AND STU.SC = 100)
 		OR (ATT.PR != 'A' AND STU.SC = 100)
-	    OR (DATEDIFF(DAY, STU.BD,GETDATE())/365.25 >= 12 AND STU.SP = 'B' )
+	    OR (DATEDIFF(DAY, STU.BD,GETDATE())/365.25 >= 12 AND STU.SP = 'B' AND TRIM(STU.U7) != 'B')
 		OR (DATEDIFF(DAY, STU.BD,GETDATE())/365.25 < 12 AND STU.SP = 'C' ))
 
 */

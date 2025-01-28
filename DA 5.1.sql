@@ -1,4 +1,8 @@
 -- for testing purposes
+
+--select tg, case when not tg>'' then 'TRUE' ELSE 'FALSE' END [test], count(*) from stu group by tg
+
+
 SELECT 
 	STU.ID as StudentID, 
 	STU.ITD [STU.ITD], 
@@ -7,6 +11,7 @@ SELECT
 	CSE.DR [CSE.DR],
 	ENR.RowNum [ENR Row],
 	ATT.RowNum1 [ATT row],	
+	STU.TG,
 	TRIM(
 		CONCAT(
 			CASE WHEN TRIM([STU].[ITD]) = '' THEN 'DOR on the Demographics page is missing; ' ELSE '' END,
@@ -15,11 +20,17 @@ SELECT
 			CASE WHEN ENR.ITD != ATT.ITD THEN 'DOR does not match between ENR and ATT tables; ' ELSE '' END,
 			CASE WHEN ATT.ITD != STU.ITD THEN 'DOR does not match between ATT and STU tables; ' ELSE '' END,
 			CASE WHEN TRIM(CSE.DR) = '' THEN 'Student has CSE record, but no DSEA recorded; ' ELSE '' END,
-			CASE WHEN CSE.DR != '0910090' THEN 'All Charter students should have DSEA = 0910090; ' ELSE '' END
+			CASE WHEN CSE.DR != '0910090' THEN 'All Charter students should have DSEA = 0910090; ' ELSE '' END,
+			CASE WHEN CSE.XD IS NOT NULL AND CSE.XD < GETDATE() THEN 'STUDENT EXITED' ELSE '' END
 		)
 	) AS [Description],
 	STU.GR,
-	STU.*
+	STU.SC
+	--CSE.ED [ED enter date],
+	--CSE.XD [XD exit date],
+	--CSE.LI [LI last iep meeting],
+	--CSE.AD [AD next annual review],
+	--CSE.TA [TA next trienniel review]
 FROM 
 	(
 		SELECT [STU].* 
@@ -58,10 +69,12 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-	NOT STU.TG > ' '
+	1=1
+	--AND NOT STU.TG > ' '
 	AND (ENR.RowNum = 1 OR ENR.RowNum is null)
-	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 is null and not stu.tg > '') OR (ATT.RowNum1 = 1 AND STU.TG > ''))
 	AND STU.SC IN (51,100,101,150)
+	AND (CSE.XD IS NULL OR CSE.XD > GETDATE()) --student has not been exited from iep, or exit date is in the future
 	AND (TRIM([STU].[ITD]) = ''
 		OR ENR.ITD is null
 		OR ATT.ITD is null
@@ -138,11 +151,13 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-	NOT STU.TG > ' '
+	1=1
+	--AND NOT STU.TG > ' '
 	AND (ENR.RowNum = 1 OR ENR.RowNum is null)
-	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+	AND (ATT.RowNum1 = 1 OR (ATT.RowNum1 is null and not stu.tg > '') OR (ATT.RowNum1 = 1 AND STU.TG > ''))
 	AND STU.SC = @SchoolCode
 	AND STU.ID IN (@StudentID)
+	AND (CSE.XD IS NULL OR CSE.XD > GETDATE())
 	AND (TRIM([STU].[ITD]) = ''
 		OR ENR.ITD is null
 		OR ATT.ITD is null

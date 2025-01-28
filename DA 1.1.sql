@@ -7,7 +7,8 @@ SELECT
 	[ENR].[ITD] [ENR.ITD],
 	[ATT].[ITD] [ATT.ITD],
 	ENR.RowNum [ENR Row],
-	ATT.RowNum1 [ATT row],	
+	ATT.RowNum,
+	STU.TG,
 	TRIM(
 		CONCAT(
 			CASE WHEN TRIM([STU].[ITD]) = '' THEN 'DOR on the Demographics page is missing; ' ELSE '' END,
@@ -20,8 +21,10 @@ SELECT
 			CASE WHEN ATT.ITD != STU.ITD THEN 'DOR does not match between Attendance Enrollment and Demographics; ' ELSE '' END
 		)
 	) AS [Description],
-	STU.*, 
-	CSE.*
+	STU.SC,
+	STU.SN,
+	STU.LN,
+	STU.FN
 FROM 
 	(
 		SELECT [STU].* 
@@ -35,13 +38,13 @@ LEFT JOIN
 		WHERE DEL = 0
 	) CSE 
 	ON STU.ID = CSE.ID
-LEFT JOIN 
+INNER JOIN 
     (
         SELECT 
 			[ATT].*,
 			ROW_NUMBER() OVER (
 					PARTITION BY ATT.SC, ATT.SN ORDER BY ATT.DT DESC
-					) AS RowNum1  -- most recent
+					) AS RowNum    -- most recent Enter
         FROM ATT 
         WHERE DEL = 0 AND CD = 'E'
     ) ATT 
@@ -60,9 +63,9 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-	NOT STU.TG > ' '
+	1=1
 	AND (ENR.RowNum = 1 OR ENR.RowNum is null)
-	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+	AND ATT.RowNum = 1
 	AND STU.SC IN (60,61,68,69,70,72,73)
 	AND (CSE.DR is null 
 		OR TRIM([STU].[ITD]) = ''
@@ -75,14 +78,6 @@ WHERE
 ORDER BY
 	STU.SC, STU.ID
 
-
-/*
-
-select count(distinct ID) AS count_id from cse group by sc
-select * from cse
-where SC IN (60,61,68,69,70,72,73)
-
-*/
 
 
 /*
@@ -115,13 +110,13 @@ LEFT JOIN
 		WHERE DEL = 0
 	) CSE 
 	ON STU.ID = CSE.ID
-LEFT JOIN 
+INNER JOIN 
     (
         SELECT 
 			[ATT].*,
 			ROW_NUMBER() OVER (
 					PARTITION BY ATT.SC, ATT.SN ORDER BY ATT.DT DESC
-					) AS RowNum1  -- most recent
+					) AS RowNum    -- most recent Enter
         FROM ATT 
         WHERE DEL = 0 AND CD = 'E'
     ) ATT 
@@ -140,9 +135,9 @@ LEFT JOIN
     ON [STU].[ID] = [ENR].[ID]
 	AND STU.SC = ENR.SC
 WHERE 
-	NOT STU.TG > ' '
+	1=1
 	AND (ENR.RowNum = 1 OR ENR.RowNum is null)
-	AND (ATT.RowNum1 = 1 OR ATT.RowNum1 is null)
+	AND ATT.RowNum = 1
 	AND STU.SC = @SchoolCode
 	AND STU.ID IN (@StudentID)
 	AND (CSE.DR is null 

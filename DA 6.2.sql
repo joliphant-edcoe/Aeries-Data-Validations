@@ -54,12 +54,13 @@ WHERE
                 AND ID = CAT.ID
           )
     ) IN ('','A')
+	AND CAT.DT >= DATEADD(WEEK, -4, GETDATE())
 GROUP BY 
     CAT.ID, 
     CAT.DT, 
     CAT.SCL
 HAVING 
-    COUNT(CAT.AC) = (
+    COUNT(CAT.AC) >= (
         SELECT COUNT(SE) 
         FROM CAR 
         WHERE CAR.DEL = 0 
@@ -71,7 +72,7 @@ HAVING
               WHERE STU.SC = CAT.SCL 
                 AND STU.ID = CAT.ID
           ) 
-    ) 
+    ) - 1
 )
 SELECT 
 	ID [StudentID], 
@@ -85,9 +86,8 @@ ORDER BY
     ID;
 
 
-
 /*
-
+--for Aeries
 WITH data AS (
 SELECT 
     CAT.SCL,
@@ -144,12 +144,13 @@ WHERE
                 AND ID = CAT.ID
           )
     ) IN ('','A')
+	AND CAT.DT >= DATEADD(WEEK, -4, GETDATE())
 GROUP BY 
     CAT.ID, 
     CAT.DT, 
     CAT.SCL
 HAVING 
-    COUNT(CAT.AC) = (
+    COUNT(CAT.AC) >= (
         SELECT COUNT(SE) 
         FROM CAR 
         WHERE CAR.DEL = 0 
@@ -161,7 +162,7 @@ HAVING
               WHERE STU.SC = CAT.SCL 
                 AND STU.ID = CAT.ID
           ) 
-    ) 
+    ) - 1
 )
 SELECT 
 	ID [StudentID], 
@@ -169,7 +170,8 @@ SELECT
 	+ CAST([Number of Absences] AS VARCHAR) + ' of them (' + [Period Absences] + '). The all day code is ' + 
 	CASE WHEN AllDayCode = '' THEN 'blank.' ELSE '' END + [AllDayCode]) [Description]
 FROM data
-WHERE ID IN (@StudentID)
+WHERE ID in (@StudentID)
+
 
 
 */
